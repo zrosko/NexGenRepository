@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.rbc.nexgen.helloworld.model.User;
 //TODO Change this direct Microservice call using Eureka to call Gateway
-//@FeignClient("gateway-service")
-@FeignClient("otherservice")
+@FeignClient("gateway-service")
+//@FeignClient("otherservice")
 public interface OtherServiceClient {
 	
 	@RequestMapping(method = RequestMethod.POST, value = "users", consumes = "application/json")
