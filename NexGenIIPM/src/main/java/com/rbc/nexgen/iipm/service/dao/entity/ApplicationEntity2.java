@@ -18,13 +18,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="application")
+@Table(name="application2")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
-public class ApplicationEntity {
+public class ApplicationEntity2 {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;

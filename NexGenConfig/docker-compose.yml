@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+
+  config:
+    image: nexgen/config:latest
+    mem_limit: 700m
+    ports:
+      - "8888:8080"
+    networks:
+      - nexgen-network
+    
+  eureka:
+    image: nexgen/eureka:latest
+    mem_limit: 700m
+    ports:
+      - "8761:8080"
+    networks:
+      - nexgen-network
+    
+  gateway:
+    image: nexgen/gateway:latest
+    mem_limit: 700m
+    ports:
+      - "8080:8080"
+    networks:
+      - nexgen-network
+  
+  iipm:
+    image: nexgen/iipm:latest
+    mem_limit: 700m
+    ports:
+      - "9000:8080"
+    networks:
+      - nexgen-network
+      
+  workday:
+    image: nexgen/workday:latest
+    mem_limit: 700m
+    ports:
+      - "9000:8080"
+    networks:
+      - nexgen-network  
+networks:
+  nexgen-network:

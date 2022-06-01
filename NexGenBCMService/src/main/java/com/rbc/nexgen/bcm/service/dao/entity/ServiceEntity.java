@@ -16,11 +16,17 @@ import org.hibernate.validator.constraints.Length;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 //https://howtodoinjava.com/jpa/jpa-native-query-example-select/
 @Entity(name="ServiceEntity")
 @Table(name="bcm_service")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @NamedNativeQueries({
     @NamedNativeQuery(

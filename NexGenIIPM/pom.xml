@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.rbc.nexgen.iipm</groupId>
-	<artifactId>nexgeniipmmaster</artifactId>
+	<artifactId>nexgeniipm</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>NexGenIipmMaster</name>
-	<description>NexGen IIPM Master</description>
+	<name>NexGenIipm</name>
+	<description>NexGen IIPM</description>
 	<properties>
 		<java.version>11</java.version>
 		<spring-cloud.version>2021.0.2</spring-cloud.version>

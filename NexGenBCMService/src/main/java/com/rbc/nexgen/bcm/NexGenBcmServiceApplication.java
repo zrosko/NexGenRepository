@@ -12,10 +12,10 @@ public class NexGenBcmServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(NexGenBcmServiceApplication.class, args);
 	}
-	@Bean
+/*	@Bean
 	public NewTopics topic() {
 		return new NewTopics(
 				TopicBuilder.name("bcm_service_source_topic").build(),
 				TopicBuilder.name("bcm_service_sink_topic").build());
-	}
+	}*/
 }

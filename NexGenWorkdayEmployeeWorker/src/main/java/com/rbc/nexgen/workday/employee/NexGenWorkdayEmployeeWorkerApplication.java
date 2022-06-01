@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+//TODO @EnableFeignClient("")
 public class NexGenWorkdayEmployeeWorkerApplication {
 
 	public static void main(String[] args) {

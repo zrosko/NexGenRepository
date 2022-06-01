@@ -21,9 +21,10 @@ public class NexGenBanner implements Banner {
 		// out.println("------- Server port : " + env.getProperty("server.port"));
 		out.println("=================================================================");
 	}
-	public static void main(String[] args) {
-		test();
-	}
+
+	/*
+	 * public static void main(String[] args) { test(); }
+	 */
 	public static void test() {
 		Application a = new Application();
 		a.setAppCode("AAPL");
