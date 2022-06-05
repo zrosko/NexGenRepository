@@ -24,53 +24,54 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @EnableEurekaClient
 public class NexGenGatewayApplication {
 //TODO CircuitBreaker https://cloud.spring.io/spring-cloud-gateway/reference/html/#spring-cloud-circuitbreaker-filter-factory
-	@RequestMapping("/circuitbreakerfallback")
-	public String circuitbreakerfallback() {
-		return "This is a fallback";
-	}	
+	/*
+	 * @RequestMapping("/circuitbreakerfallback") public String
+	 * circuitbreakerfallback() { return "This is a fallback"; }
+	 */	
 
-	@Bean
-	RedisRateLimiter redisRateLimiter() {
-		return new RedisRateLimiter(1, 2);
-	}
+	/*
+	 * @Bean RedisRateLimiter redisRateLimiter() { return new RedisRateLimiter(1,
+	 * 2); }
+	 */
 	//TODO see SecurityConfiguration class
-	@Bean
-	SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity http) throws Exception {
-		return http.httpBasic().and()
-				.csrf().disable()
-				.authorizeExchange()
-				.pathMatchers("/anything/**").authenticated()
-				.anyExchange().permitAll()
-				.and()
-				.build();
-	}
+	/*
+	 * @Bean SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity http)
+	 * throws Exception { return http.httpBasic().and() .csrf().disable()
+	 * .authorizeExchange() .pathMatchers("/anything/**").authenticated()
+	 * .anyExchange().permitAll() .and() .build(); }
+	 */
 
 	//Add versions here
 	//https://rapidapi.com/blog/how-to-build-an-api-with-java/
 	//Can be donein application.properties (refresh only, no need to restart)
 	@Bean
-	public RouteLocator myRoutes(RouteLocatorBuilder builder) {
+	public RouteLocator routes(RouteLocatorBuilder builder) {
 	    return builder.routes()
-	        .route(p -> p
+	    	.route(r -> r
+	            .path("/v1/nexgen/iipm/**")
+	            .filters(f -> f.rewritePath("/v1/nexgen/iipm/(?<segment>.*)","/${segment}")
+	            				.addResponseHeader("NexGen-Response-Time",new Date().toString()))
+	            .uri("lb://IIPM"))
+	        .route(r -> r
 	            .path("/v1/nexgen/accounts/**")
 	            .filters(f -> f.rewritePath("/v1/nexgen/accounts/(?<segment>.*)","/${segment}")
 	            				.addResponseHeader("NexGen-Response-Time",new Date().toString()))
-	            .uri("lb://ACCOUNTS")).
-	        route(p -> p
-		            .path("/v2/nexgen/accounts/**")
-		            .filters(f -> f.rewritePath("/v2/nexgen/accounts/(?<segment>.*)","/v2/${segment}")
-		            				.addResponseHeader("NexGen-Response-Time",new Date().toString()))
-		            .uri("lb://ACCOUNTS")).
-	        route(p -> p
-		            .path("/v1/nexgen/loans/**")
-		            .filters(f -> f.rewritePath("/v1/nexgen/loans/(?<segment>.*)","/${segment}")
-		            		.addResponseHeader("NexGen-Response-Time",new Date().toString()))
-		            .uri("lb://LOANS")).
-	        route(p -> p
-		            .path("/v1/nexgen/cards/**")
-		            .filters(f -> f.rewritePath("/v1/nexgen/cards/(?<segment>.*)","/${segment}")
-		            		.addResponseHeader("NexGen-Response-Time",new Date().toString()))
-		            .uri("lb://CARDS")).build();
+	            .uri("lb://ACCOUNTS"))
+	        .route(r -> r
+	            .path("/v2/nexgen/accounts/**")
+	            .filters(f -> f.rewritePath("/v2/nexgen/accounts/(?<segment>.*)","/v2/${segment}")
+	            				.addResponseHeader("NexGen-Response-Time",new Date().toString()))
+		        .uri("lb://ACCOUNTS"))
+	        .route(r -> r
+	            .path("/v1/nexgen/loans/**")
+	            .filters(f -> f.rewritePath("/v1/nexgen/loans/(?<segment>.*)","/${segment}")
+	            		.addResponseHeader("NexGen-Response-Time",new Date().toString()))
+	            .uri("lb://LOANS"))
+	        .route(r -> r
+	            .path("/v1/nexgen/cards/**")
+	            .filters(f -> f.rewritePath("/v1/nexgen/cards/(?<segment>.*)","/${segment}")
+	            		.addResponseHeader("NexGen-Response-Time",new Date().toString()))
+	            .uri("lb://CARDS")).build();
 	}
 	public static void main(String[] args) {
 		SpringApplication.run(NexGenGatewayApplication.class, args);

@@ -7,10 +7,12 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 
 import reactor.core.publisher.Mono;
 
+@Order(3)
 @Configuration
 public class ResponseTraceFilter {
 

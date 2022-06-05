@@ -25,12 +25,20 @@ services:
       - "8080:8080"
     networks:
       - nexgen-network
-  
+        
+  ping:
+    image: nexgen/ping:latest
+    mem_limit: 700m
+    ports:
+      - "9000:8080"
+    networks:
+      - nexgen-network
+      
   iipm:
     image: nexgen/iipm:latest
     mem_limit: 700m
     ports:
-      - "9000:8080"
+      - "9001:8080"
     networks:
       - nexgen-network
       
@@ -38,7 +46,7 @@ services:
     image: nexgen/workday:latest
     mem_limit: 700m
     ports:
-      - "9000:8080"
+      - "9002:8080"
     networks:
       - nexgen-network  
 networks:
