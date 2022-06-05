@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.rbc.nexgen</groupId>
-	<artifactId>nexgen</artifactId>
+	<artifactId>ping</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>NexGenPing</name>
 	<description>Nex Gen Ping</description>
