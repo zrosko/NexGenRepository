@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.rbc.nexgen.bcm.config.NexGenPingConfig;
 import com.rbc.nexgen.bcm.model.NexGenProperties;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 
 @RestController
@@ -29,9 +31,16 @@ public class PingController {
 	private String test_property = "9000";
 	
 	@GetMapping("/ping")
+	@CircuitBreaker(name = "pingCircuitBreaker",fallbackMethod ="pingSoryService")
+	@Retry(name = "pingRetry", fallbackMethod = "handleError")
 	public String pingService() throws Exception {
 		System.out.println(" *** HelloWorldController.pingService invoked *** ");
 		return "PingController.pingService invoked - OK";
+	}
+	@GetMapping("/ping-sorry")
+	private String pingSoryService(Throwable t) throws Exception {
+		System.out.println(" *** HelloWorldController.pingService invoked *** ");
+		return "PingController.pingService invoked - NOT OK";
 	}
 	
 	@GetMapping("/hello")
@@ -72,5 +81,15 @@ public class PingController {
 	public String handleError(Exception exception) {
 		System.out.println("PingController.handleError");
 		return "Exception, when saving a user";
+	}
+	
+	@GetMapping("/sayHello2")
+	@RateLimiter(name = "sayHello2", fallbackMethod = "sayHelloFallback2")
+	public String sayHello2() {
+		return "Hello, Welcome to EazyBank Kubernetes cluster";
+	}
+
+	public String sayHelloFallback2(Throwable t) {
+		return "Hi, Welcome to NexGen";
 	}
 }

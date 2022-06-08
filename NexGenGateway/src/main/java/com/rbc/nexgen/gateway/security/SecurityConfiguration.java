@@ -1,42 +1,38 @@
 package com.rbc.nexgen.gateway.security;
 
-//https://spring.io/blog/2022/02/21/spring-security-without-the-websecurityconfigureradapter
-//MySql sample https://www.youtube.com/watch?v=tDZPdovCH4I
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-/*import org.springframework.context.annotation.Bean;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.web.SecurityFilterChain;*/
-//TODO UserDetailService, AuthenticationManager
+import reactor.core.publisher.Mono;
+
 @Configuration
+@EnableWebFluxSecurity
 public class SecurityConfiguration {
-	
-	//TODO
-	//@Autowired
-	//private NexGenAuthenticationProvider authenticationProvider;
-	//protected void configure(AuthenticationManagerBuilder auth){
-	//auth.authenticationProvider(authenticationProvider);
-	/*
-	 * @Bean public SecurityFilterChain filterChain(HttpSecurity http) throws
-	 * Exception { //http.authorizeHttpRequests((authz) ->
-	 * authz.anyRequest().authenticated()); http.csrf().disable()
-	 * .authorizeRequests() .antMatchers(HttpMethod.POST,"/iipmapi").permitAll()
-	 * .antMatchers("/iipmapi").permitAll() .antMatchers("/workdayapi").permitAll()
-	 * .antMatchers("/fibrsapi").permitAll() .antMatchers("/archermapi").permitAll()
-	 * .and().formLogin().and().httpBasic(); return http.build(); }
-	 * 
-	 * @Bean public WebSecurityCustomizer webSecurityCustomizer() { return (web) ->
-	 * web.ignoring().antMatchers("/ignore1", "/ignore2"); }
-	 * 
-	 * @Bean public AuthenticationManager filterChain(AuthenticationManagerBuilder
-	 * auth) throws Exception { auth.inMemoryAuthentication()
-	 * .withUser("user").password("user").roles("USER") .and()
-	 * .withUser("admin").password("admin").roles("USER", "ADMIN") .and()
-	 * .passwordEncoder(null); return auth.build(); }
-	 */
+
+	@Bean
+	public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+		http.authorizeExchange(exchanges -> exchanges
+				.pathMatchers("/nexgen/iipm/**").hasRole("ADMIN")
+				.pathMatchers("/nexgen/ping/**").authenticated()
+				.pathMatchers("/nexgen/workday/**").permitAll())
+				.oauth2ResourceServer().jwt().jwtAuthenticationConverter(grantedAuthoritiesExtractor());
+		//since no browser involed disable
+		http.csrf().disable();
+		return http.build();
+	}
+
+	Converter<Jwt, Mono<AbstractAuthenticationToken>> grantedAuthoritiesExtractor() {
+		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new SecurityRoleConverter());
+		return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
+	}
 
 }

@@ -11,14 +11,10 @@ import java.util.Date;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @SpringBootApplication
 @EnableEurekaClient
@@ -47,6 +43,11 @@ public class NexGenGatewayApplication {
 	@Bean
 	public RouteLocator routes(RouteLocatorBuilder builder) {
 	    return builder.routes()
+    		.route(r -> r
+    			.path("/v1/nexgen/ping/**")
+    			.filters(f -> f.rewritePath("/v1/nexgen/ping/(?<segment>.*)","/${segment}")
+    	            			.addResponseHeader("NexGen-Response-Time",new Date().toString()))
+    			.uri("lb://PING"))
 	    	.route(r -> r
 	            .path("/v1/nexgen/iipm/**")
 	            .filters(f -> f.rewritePath("/v1/nexgen/iipm/(?<segment>.*)","/${segment}")

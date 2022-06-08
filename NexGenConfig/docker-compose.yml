@@ -19,6 +19,9 @@ services:
       - nexgen-network
     depends_on:
       - config
+    environment:
+        SPRING_PROFILES_ACTIVE: default
+        SPRING_CONFIG_IMPORT: configserver:http://config:8888/
     
   gateway:
     image: nexgen/gateway:latest
@@ -28,7 +31,12 @@ services:
     networks:
       - nexgen-network
     depends_on:
+      - config
       - eureka
+    environment:
+        SPRING_PROFILES_ACTIVE: default
+        SPRING_CONFIG_IMPORT: configserver:http://config:8888/
+        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/ 
         
   ping:
     image: nexgen/ping:latest
@@ -38,6 +46,8 @@ services:
     networks:
       - nexgen-network
     depends_on:
+      - config
+      - eureka
       - gateway
     deploy:
       restart_policy:
@@ -47,7 +57,8 @@ services:
         window: 120s
     environment:
         SPRING_PROFILES_ACTIVE: default
-        SPRING_CONFIG_IMPORT: configserver:http://config:8888/ 
+        SPRING_CONFIG_IMPORT: configserver:http://config:8888/
+        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/ 
          
 networks:
   nexgen-network:

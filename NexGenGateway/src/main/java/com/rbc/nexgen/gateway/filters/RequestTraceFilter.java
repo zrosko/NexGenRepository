@@ -1,7 +1,5 @@
 package com.rbc.nexgen.gateway.filters;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -10,14 +8,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Order(1)
 @Component
+@Slf4j
 public class RequestTraceFilter implements GlobalFilter {
 
-	private static final Logger logger = LoggerFactory.getLogger(RequestTraceFilter.class);
-	
 	@Autowired
 	FilterUtility filterUtility;
 
@@ -25,15 +23,15 @@ public class RequestTraceFilter implements GlobalFilter {
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 		HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
 		if (isTraceIdPresent(requestHeaders)) {
-			logger.debug("Nexgen-trace-id found in tracing filter: {}. ",
+			log.debug("Nexgen-trace-id found in tracing filter: {}. ",
 					filterUtility.getTraceId(requestHeaders));
 		} else {
 			String traceID = generateTraceId();
 			exchange = filterUtility.setTraceId(exchange, traceID);
-			logger.debug("Nexgen-trace-id generated in tracing filter: {}.", traceID);
+			log.debug("Nexgen-trace-id generated in tracing filter: {}.", traceID);
 		}
 		return chain.filter(exchange).then(Mono.fromRunnable(() -> {
-			System.out.println("*** POST processing logic goes here");
+			log.info("*** POST processing logic goes here");
 		}));
 	}
 

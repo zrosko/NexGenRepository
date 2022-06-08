@@ -9,7 +9,10 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 public class NexGenEurekaApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NexGenEurekaApplication.class, args);
+		SpringApplication application = new SpringApplication(NexGenEurekaApplication.class);
+		//application.setBannerMode(Banner.Mode.OFF);
+		application.setBanner(new NexGenBanner());
+		application.run(args);
 	}
 
 }

@@ -1,7 +1,5 @@
 package com.rbc.nexgen.gateway.filters;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.sleuth.Tracer;
@@ -10,13 +8,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Order(3)
 @Configuration
+@Slf4j
 public class ResponseTraceFilter {
-
-	private static final Logger logger = LoggerFactory.getLogger(ResponseTraceFilter.class);
 
 	@Autowired
 	FilterUtility filterUtility;
@@ -30,7 +28,7 @@ public class ResponseTraceFilter {
 			return chain.filter(exchange).then(Mono.fromRunnable(() -> {
 				HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
 				String correlationId = filterUtility.getTraceId(requestHeaders);
-				logger.debug("Updated the correlation id to the outbound headers. {}", correlationId);
+				log.debug("Updated the correlation id to the outbound headers. {}", correlationId);
 				exchange.getResponse().getHeaders().add(FilterUtility.TRACE_ID, correlationId);
 			}));
 		};

@@ -6,15 +6,17 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 @Order(2)
 @Component
+@Slf4j
 public class MyFilter implements GlobalFilter {
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-		System.out.println("Preprocessing goes here"+exchange.getRequest());
+		log.info("Preprocessing goes here"+exchange.getRequest());
 		return chain.filter(exchange).then(Mono.fromRunnable(() -> {
-			System.out.println("Post processing goes here"+exchange.getResponse());
+			log.info("Post processing goes here"+exchange.getResponse());
 		}));
 	}
 
