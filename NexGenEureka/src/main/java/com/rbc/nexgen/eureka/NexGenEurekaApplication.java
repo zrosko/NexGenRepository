@@ -3,7 +3,7 @@ package com.rbc.nexgen.eureka;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
-
+// PATTERN: https://microservices.io/patterns/server-side-discovery.html
 @SpringBootApplication
 @EnableEurekaServer
 public class NexGenEurekaApplication {
