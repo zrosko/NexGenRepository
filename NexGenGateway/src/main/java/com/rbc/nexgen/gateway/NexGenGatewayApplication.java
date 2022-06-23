@@ -44,35 +44,35 @@ public class NexGenGatewayApplication {
 	public RouteLocator routes(RouteLocatorBuilder builder) {
 	    return builder.routes()
     		.route(r -> r
-    			.path("/v1/nexgen/ping/**")
-    			.filters(f -> f.rewritePath("/v1/nexgen/ping/(?<segment>.*)","/${segment}")
+    			.path("/v1/nexgen/template/**")
+    			.filters(f -> f.rewritePath("/v1/nexgen/template/(?<segment>.*)","/${segment}")
     	            			.addResponseHeader("NexGen-Response-Time",new Date().toString()))
-    			.uri("lb://PING"))
+    			.uri("lb://TEMPLATE"))
 	    	.route(r -> r
 	            .path("/v1/nexgen/iipm/**")
 	            .filters(f -> f.rewritePath("/v1/nexgen/iipm/(?<segment>.*)","/${segment}")
 	            				.addResponseHeader("NexGen-Response-Time",new Date().toString()))
 	            .uri("lb://IIPM"))
 	        .route(r -> r
-	            .path("/v1/nexgen/accounts/**")
-	            .filters(f -> f.rewritePath("/v1/nexgen/accounts/(?<segment>.*)","/${segment}")
+	            .path("/v1/nexgen/srma/**")
+	            .filters(f -> f.rewritePath("/v1/nexgen/srma/(?<segment>.*)","/${segment}")
 	            				.addResponseHeader("NexGen-Response-Time",new Date().toString()))
-	            .uri("lb://ACCOUNTS"))
+	            .uri("lb://SRMA"))
 	        .route(r -> r
-	            .path("/v2/nexgen/accounts/**")
-	            .filters(f -> f.rewritePath("/v2/nexgen/accounts/(?<segment>.*)","/v2/${segment}")
+	            .path("/v2/nexgen/srma/**")
+	            .filters(f -> f.rewritePath("/v2/nexgen/srma/(?<segment>.*)","/v2/${segment}")
 	            				.addResponseHeader("NexGen-Response-Time",new Date().toString()))
-		        .uri("lb://ACCOUNTS"))
+		        .uri("lb://SRMA"))
 	        .route(r -> r
-	            .path("/v1/nexgen/loans/**")
-	            .filters(f -> f.rewritePath("/v1/nexgen/loans/(?<segment>.*)","/${segment}")
+	            .path("/v1/nexgen/fibrs/**")
+	            .filters(f -> f.rewritePath("/v1/nexgen/fibrs/(?<segment>.*)","/${segment}")
 	            		.addResponseHeader("NexGen-Response-Time",new Date().toString()))
-	            .uri("lb://LOANS"))
+	            .uri("lb://FIBRS"))
 	        .route(r -> r
-	            .path("/v1/nexgen/cards/**")
-	            .filters(f -> f.rewritePath("/v1/nexgen/cards/(?<segment>.*)","/${segment}")
+	            .path("/v1/nexgen/workday/**")
+	            .filters(f -> f.rewritePath("/v1/nexgen/workday/(?<segment>.*)","/${segment}")
 	            		.addResponseHeader("NexGen-Response-Time",new Date().toString()))
-	            .uri("lb://CARDS")).build();
+	            .uri("lb://WORKDAY")).build();
 	}
 	public static void main(String[] args) {
 		SpringApplication.run(NexGenGatewayApplication.class, args);
