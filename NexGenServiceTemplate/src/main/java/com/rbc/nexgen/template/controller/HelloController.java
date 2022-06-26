@@ -48,6 +48,11 @@ public class HelloController {
 	@GetMapping("/hello")
 	@CircuitBreaker(name = "helloCircuitBreaker",fallbackMethod ="helloSoryService")
 	@Retry(name = "helloRetry", fallbackMethod = "handleError")
+	/**
+	 * This is test documentation.
+	 * @return
+	 * @throws Exception
+	 */
 	public String helloService() throws Exception {
 		System.out.println(" *** HelloController.helloService invoked, properties = "+templateConfig);
 		HelloMessage message = new HelloMessage();
@@ -92,7 +97,7 @@ public class HelloController {
 	@GetMapping("/sayHello2")
 	@RateLimiter(name = "sayHello2", fallbackMethod = "sayHelloFallback2")
 	public String sayHello2() {
-		return "Hello, Welcome to EazyBank Kubernetes cluster";
+		return "Hello, Welcome to hello2 api.";
 	}
 
 	public String sayHelloFallback2(Throwable t) {
