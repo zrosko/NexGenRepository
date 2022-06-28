@@ -121,10 +121,19 @@ public class DefaultJobConfig {
 	
 	private Step firstChunkStep() {
 		return stepBuilderFactory.get("First Chunk Step")
-				.<Student, com.rbc.nexgen.batch.mysql.entity.Student>chunk(3)
-				.reader(jpaCursorItemReader(null, null))
-				.processor(firstItemProcessor)
-				.writer(jpaItemWriter())
+				/* JPA input/oputput*/
+				//.<Student, com.rbc.nexgen.batch.mysql.entity.Student>chunk(3)
+				.<StudentJdbc, StudentJdbc>chunk(3)
+				/* JDBC input */
+				.reader(jdbcCursorItemReader())
+				/* JPA input */
+				//.reader(jpaCursorItemReader(null, null))
+				/* JPA/JPA process*/
+				//.processor(firstItemProcessor)
+				/* CSV output */
+				.writer(flatFileItemWriter(null))
+				/* JPA output */
+				//.writer(jpaItemWriter())
 				.faultTolerant()
 				.skip(Throwable.class)
 				//.skip(NullPointerException.class)
@@ -222,6 +231,8 @@ public class DefaultJobConfig {
 		return staxEventItemReader;
 	}
 	
+	@StepScope
+	@Bean
 	public JdbcCursorItemReader<StudentJdbc> jdbcCursorItemReader() {
 		JdbcCursorItemReader<StudentJdbc> jdbcCursorItemReader = 
 				new JdbcCursorItemReader<StudentJdbc>();
@@ -256,6 +267,8 @@ public class DefaultJobConfig {
 	}
 	*/
 	
+	/**  From JDBC to CSV - this method is called for each item (row)
+	 * **/
 	@StepScope
 	@Bean
 	public FlatFileItemWriter<StudentJdbc> flatFileItemWriter(
@@ -265,6 +278,7 @@ public class DefaultJobConfig {
 		
 		flatFileItemWriter.setResource(fileSystemResource);
 		
+		/* Prepare column header (it is possible to set a footer,see below) */
 		flatFileItemWriter.setHeaderCallback(new FlatFileHeaderCallback() {
 			@Override
 			public void writeHeader(Writer writer) throws IOException {
@@ -272,6 +286,7 @@ public class DefaultJobConfig {
 			}
 		});
 		
+		/* Set line delimiter, default is comma (,), you may set "|"; prepare data. */
 		flatFileItemWriter.setLineAggregator(new DelimitedLineAggregator<StudentJdbc>() {
 			{
 				//setDelimiter("|");
@@ -283,6 +298,7 @@ public class DefaultJobConfig {
 			}
 		});
 		
+		/* Prepare footer line (if required) */
 		flatFileItemWriter.setFooterCallback(new FlatFileFooterCallback() {
 			@Override
 			public void writeFooter(Writer writer) throws IOException {
