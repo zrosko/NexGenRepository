@@ -7,6 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 /*
+ * TODO https://docs.spring.io/spring-cloud-vault/docs/current/reference/html/#client-side-usage
 inputFile=C:\Programs\Spring\Workspaces\NexGenBatchTemplate\InputFiles\students.csv currentItemCount=10 maxItemCount=100
  //@RefreshScope
  */
@@ -19,7 +20,8 @@ inputFile=C:\Programs\Spring\Workspaces\NexGenBatchTemplate\InputFiles\students.
 	"com.rbc.nexgen.batch.listener", 
 	"com.rbc.nexgen.batch.reader", 
 	"com.rbc.nexgen.batch.processor", 
-	"com.rbc.nexgen.batch.writer", 
+	"com.rbc.nexgen.batch.writer",
+	"com.rbc.nexgen.batch.service", 
 	"com.rbc.nexgen.batch.listener"
 })
 public class BatchTemplateApplication {

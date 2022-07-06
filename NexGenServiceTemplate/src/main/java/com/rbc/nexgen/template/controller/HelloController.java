@@ -23,6 +23,7 @@ import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.log4j.Log4j2;
 //TODO trace id
 //@Retry(name="hello-retry", fallbackMethod = "handleError")
+//AUTH2 https://github.com/simplyi/PhotoAppWebClient/blob/master/src/main/resources/application.properties
 @RefreshScope
 @RestController
 @Log4j2

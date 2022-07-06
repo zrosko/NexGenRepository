@@ -16,6 +16,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.adapter.ItemReaderAdapter;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.ItemPreparedStatementSetter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
@@ -40,10 +41,12 @@ import org.springframework.batch.item.xml.StaxEventItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
@@ -52,11 +55,18 @@ import com.rbc.nexgen.batch.listener.SkipListenerImpl;
 import com.rbc.nexgen.batch.model.StudentCsv;
 import com.rbc.nexgen.batch.model.StudentJdbc;
 import com.rbc.nexgen.batch.model.StudentJson;
+import com.rbc.nexgen.batch.model.StudentResponse;
 import com.rbc.nexgen.batch.model.StudentXml;
+import com.rbc.nexgen.batch.mysql.entity.StudentJpa;
 import com.rbc.nexgen.batch.postgresql.entity.Student;
 import com.rbc.nexgen.batch.processor.FirstItemProcessor;
+import com.rbc.nexgen.batch.processor.StudentFromRestAPIProcessor;
+import com.rbc.nexgen.batch.service.StudentService;
+
+import lombok.extern.log4j.Log4j2;
 
 @Configuration
+@Log4j2
 public class DefaultJobConfig {
 
 	@Autowired
@@ -65,6 +75,8 @@ public class DefaultJobConfig {
 	@Autowired
 	private StepBuilderFactory stepBuilderFactory;
 	
+	KafkaTemplate<Long, Student> template;
+	KafkaProperties properties;
 	/*
 	 * @Autowired private FirstItemReader firstItemReader;
 	 */
@@ -72,14 +84,15 @@ public class DefaultJobConfig {
 	@Autowired
 	private FirstItemProcessor firstItemProcessor;
 	
-	/*
-	 * @Autowired private FirstItemWriter firstItemWriter;
-	 */
+	@Autowired
+	private StudentFromRestAPIProcessor studentFromRestAPIProcessor;
 	
 	/*
-	 * @Autowired private StudentService studentService;
-	 */
-	 
+	 * @Autowired private FirstItemWriter firstItemWriter;
+	 */	
+	
+	@Autowired /* REST API */
+	private StudentService studentService;	 
 	
 	/*
 	 * @Autowired private SkipListener skipListener;
@@ -110,30 +123,58 @@ public class DefaultJobConfig {
 	
 	@Autowired
 	private JpaTransactionManager jpaTransactionManager;
-
+	
+	@Value("${jobName}")
+	private String jobName = "Default Job";
+	
 	@Bean
 	public Job defaultJob() {
-		return jobBuilderFactory.get("Default Job")
+		log.info("*** JOB: "+jobName+" - starting.");
+		
+		return jobBuilderFactory.get(jobName)
 				.incrementer(new RunIdIncrementer())
-				.start(firstChunkStep())
+				//.start(Step_1_JDBC_CSV())
+				.start(Step_2_REST_CSV())
+				//.start(Step_3_JPA_JPA())
+				.build();
+	}
+	/* *************************************************************** */
+	/*                         STEPS 							       */
+	/*     											    			   */
+	/* *************************************************************** */
+	
+	private Step Step_1_JDBC_CSV() {
+		log.info("*** JOB: "+jobName+" - step: "+"Step_1_JDBC_CSV");
+		
+		return stepBuilderFactory.get("Step_1_JDBC_CSV")
+				/* Here change chunk size for production */
+				.<StudentJdbc, StudentJdbc>chunk(2223)
+				/* JDBC input */
+				.reader(jdbcCursorItemReader())
+				/* CSV output */
+				.writer(flatFileItemWriter(null))
+				/* Other settings */
+				.faultTolerant()
+				.skip(Throwable.class)
+				.skipLimit(100)
+				.retryLimit(3)
+				.retry(Throwable.class)
+				.listener(skipListenerImpl)
 				.build();
 	}
 	
-	private Step firstChunkStep() {
-		return stepBuilderFactory.get("First Chunk Step")
-				/* JPA input/oputput*/
-				//.<Student, com.rbc.nexgen.batch.mysql.entity.Student>chunk(3)
-				.<StudentJdbc, StudentJdbc>chunk(3)
-				/* JDBC input */
-				.reader(jdbcCursorItemReader())
-				/* JPA input */
-				//.reader(jpaCursorItemReader(null, null))
-				/* JPA/JPA process*/
-				//.processor(firstItemProcessor)
+	private Step Step_2_REST_CSV() {
+		log.info("*** JOB: "+jobName+" - step: "+"Step_2_REST_CSV");
+		
+		return stepBuilderFactory.get("Step_2_REST_CSV")
+				/* Here change chunk size for production */
+				.<StudentResponse, StudentJdbc>chunk(3)
+				/* REST API input */
+				.reader(itemReaderAdapter())
+				/* REST API process */
+				.processor(studentFromRestAPIProcessor)
 				/* CSV output */
 				.writer(flatFileItemWriter(null))
-				/* JPA output */
-				//.writer(jpaItemWriter())
 				.faultTolerant()
 				.skip(Throwable.class)
 				//.skip(NullPointerException.class)
@@ -143,6 +184,33 @@ public class DefaultJobConfig {
 				.retry(Throwable.class)
 				//.listener(skipListener)
 				.listener(skipListenerImpl)
+				.build();
+	}
+	
+	/* Read from PostgreSQL and insert to the MySQL database */
+	
+	private Step Step_3_JPA_JPA() {
+		log.info("*** JOB: "+jobName+" - step: "+"Step_3_JPA_JPA");
+		
+		return stepBuilderFactory.get("Step_3_JPA_JPA")
+				/* Here change chunk size for production */
+				.<Student, StudentJpa>chunk(3)
+				/* JPA input */
+				.reader(jpaCursorItemReader(null, null))
+				/* JPA/JPA process*/
+				.processor(firstItemProcessor)
+				/* JPA output */
+				.writer(jpaItemWriter())
+				.faultTolerant()
+				.skip(Throwable.class)
+				//.skip(NullPointerException.class)
+				.skipLimit(100)
+				//.skipPolicy(new AlwaysSkipItemSkipPolicy())
+				.retryLimit(3)
+				.retry(Throwable.class)
+				//.listener(skipListener)
+				.listener(skipListenerImpl)
+				/* JPA/JPA */ 
 				.transactionManager(jpaTransactionManager)
 				.build();
 	}
@@ -231,12 +299,10 @@ public class DefaultJobConfig {
 		return staxEventItemReader;
 	}
 	
-	@StepScope
-	@Bean
 	public JdbcCursorItemReader<StudentJdbc> jdbcCursorItemReader() {
 		JdbcCursorItemReader<StudentJdbc> jdbcCursorItemReader = 
 				new JdbcCursorItemReader<StudentJdbc>();
-		
+		/* JPA */
 		jdbcCursorItemReader.setDataSource(universitydatasource);
 		jdbcCursorItemReader.setSql(
 				"select id, first_name as firstName, last_name as lastName,"
@@ -254,31 +320,35 @@ public class DefaultJobConfig {
 		return jdbcCursorItemReader;
 	}
 	
-	/*
+	/* REST API */
 	public ItemReaderAdapter<StudentResponse> itemReaderAdapter() {
 		ItemReaderAdapter<StudentResponse> itemReaderAdapter = 
 				new ItemReaderAdapter<StudentResponse>();
-		
+		/* Here name of the target service */
 		itemReaderAdapter.setTargetObject(studentService);
+		/* Here we provide a way how to return item 1 by 1 */
 		itemReaderAdapter.setTargetMethod("getStudent");
+		/* TODO */
 		itemReaderAdapter.setArguments(new Object[] {1L, "Test"});
 		
 		return itemReaderAdapter;
 	}
-	*/
 	
-	/**  From JDBC to CSV - this method is called for each item (row)
-	 * **/
+	
+	/*  From JDBC to CSV - this method is called for each item (row) */
+	
 	@StepScope
 	@Bean
 	public FlatFileItemWriter<StudentJdbc> flatFileItemWriter(
 			@Value("#{jobParameters['outputFile']}") FileSystemResource fileSystemResource) {
-		FlatFileItemWriter<StudentJdbc> flatFileItemWriter = 
-				new FlatFileItemWriter<StudentJdbc>();
 		
+		FlatFileItemWriter<StudentJdbc> flatFileItemWriter = new FlatFileItemWriter<StudentJdbc>();		
 		flatFileItemWriter.setResource(fileSystemResource);
 		
-		/* Prepare column header (it is possible to set a footer,see below) */
+		//All job repetitions should "append" to same output file
+		//flatFileItemWriter.setAppendAllowed(true);
+		
+		/* Prepare column header (it is possible to set a footer, see below) */
 		flatFileItemWriter.setHeaderCallback(new FlatFileHeaderCallback() {
 			@Override
 			public void writeHeader(Writer writer) throws IOException {
@@ -391,7 +461,7 @@ public class DefaultJobConfig {
 		return jdbcBatchItemWriter;
 	}
 	
-	/*
+	/* To REST API (call and create student)
 	public ItemWriterAdapter<StudentCsv> itemWriterAdapter() {
 		ItemWriterAdapter<StudentCsv> itemWriterAdapter = 
 				new ItemWriterAdapter<StudentCsv>();
@@ -408,25 +478,33 @@ public class DefaultJobConfig {
 	public JpaCursorItemReader<Student> jpaCursorItemReader(
 			@Value("#{jobParameters['currentItemCount']}") Integer currentItemCount,
 			@Value("#{jobParameters['maxItemCount']}") Integer maxItemCount) {
-		JpaCursorItemReader<Student> jpaCursorItemReader = 
-				new JpaCursorItemReader<Student>();
 		
-		jpaCursorItemReader.setEntityManagerFactory(postgresqlEntityManagerFactory);
-		
-		jpaCursorItemReader.setQueryString("From Student");
-		
+		JpaCursorItemReader<Student> jpaCursorItemReader = new JpaCursorItemReader<Student>();		
+		jpaCursorItemReader.setEntityManagerFactory(postgresqlEntityManagerFactory);		
+		jpaCursorItemReader.setQueryString("From Student");		
 		jpaCursorItemReader.setCurrentItemCount(currentItemCount);
-		jpaCursorItemReader.setMaxItemCount(maxItemCount);
-		
+		jpaCursorItemReader.setMaxItemCount(maxItemCount);	
 		return jpaCursorItemReader;
 	}
 	
-	public JpaItemWriter<com.rbc.nexgen.batch.mysql.entity.Student> jpaItemWriter() {
-		JpaItemWriter<com.rbc.nexgen.batch.mysql.entity.Student> jpaItemWriter = 
-				new JpaItemWriter<com.rbc.nexgen.batch.mysql.entity.Student>();
+	public JpaItemWriter<StudentJpa> jpaItemWriter() {
 		
-		jpaItemWriter.setEntityManagerFactory(mysqlEntityManagerFactory);
-		
+		JpaItemWriter<StudentJpa> jpaItemWriter = new JpaItemWriter<StudentJpa>();		
+		jpaItemWriter.setEntityManagerFactory(mysqlEntityManagerFactory);		
 		return jpaItemWriter;
 	}
+	
+	//TODO test Kafka https://www.youtube.com/watch?v=UJesCn731G4
+	/*
+	 * @Bean public KafkaItemWriter<Long, Student> kafkaItemWriter() { return new
+	 * KafkaItemWriterBuilder<Long, Student>() .kafkaTemplate(template)
+	 * .itemKeyMapper(Student::getId) .build(); }
+	 * 
+	 * @Bean public KafkaItemReader<Long, Student> kafkaItemReader() { var props =
+	 * new Properties(); props.putAll(this.properties.buildConsumerProperties());
+	 * 
+	 * return new KafkaItemReaderBuilder<Long, Student>() .partitions(0)
+	 * .consumerProperties(props) .name("student-reader") .saveState(true)
+	 * .topic("students") .build(); }
+	 */
 }
