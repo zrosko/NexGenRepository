@@ -35,6 +35,12 @@ public class DatabaseConfig {
 		return DataSourceBuilder.create().build();
 	}
 	
+	
+	  @Bean	  
+	  @ConfigurationProperties(prefix = "spring.sqlserverdatasource") public
+	  DataSource sqlserverdatasource() { return DataSourceBuilder.create().build();
+	  }
+	
 	@Bean
 	public EntityManagerFactory postgresqlEntityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean lem = 
@@ -64,6 +70,19 @@ public class DatabaseConfig {
 		return lem.getObject();
 	}
 	
+	@Bean
+	public EntityManagerFactory sqlserverEntityManagerFactory() {
+		LocalContainerEntityManagerFactoryBean lem = 
+				new LocalContainerEntityManagerFactoryBean();
+		
+		lem.setDataSource(sqlserverdatasource());
+		lem.setPackagesToScan("com.rbc.nexgen.batch.sqlserver.entity");
+		lem.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+		lem.setPersistenceProviderClass(HibernatePersistenceProvider.class);
+		lem.afterPropertiesSet();
+		
+		return lem.getObject();
+	}
 	@Bean
 	@Primary
 	public JpaTransactionManager jpaTransactionManager() {

@@ -114,12 +114,19 @@ public class DefaultJobConfig {
 	private DataSource postgresdatasource;
 	
 	@Autowired
+	@Qualifier("sqlserverdatasource") private DataSource sqlserverdatasource;
+	
+	@Autowired
 	@Qualifier("postgresqlEntityManagerFactory")
 	private EntityManagerFactory postgresqlEntityManagerFactory;
 	
 	@Autowired
 	@Qualifier("mysqlEntityManagerFactory")
 	private EntityManagerFactory mysqlEntityManagerFactory;
+	
+	@Autowired
+	@Qualifier("sqlserverEntityManagerFactory")
+	private EntityManagerFactory sqlserverEntityManagerFactory;
 	
 	@Autowired
 	private JpaTransactionManager jpaTransactionManager;
@@ -134,8 +141,9 @@ public class DefaultJobConfig {
 		return jobBuilderFactory.get(jobName)
 				.incrementer(new RunIdIncrementer())
 				//.start(Step_1_JDBC_CSV())
-				.start(Step_2_REST_CSV())
+				//.start(Step_2_REST_CSV())
 				//.start(Step_3_JPA_JPA())
+				.start(Step_4_JPA_JPA_SQL_Server())
 				.build();
 	}
 	/* *************************************************************** */
@@ -214,6 +222,33 @@ public class DefaultJobConfig {
 				.transactionManager(jpaTransactionManager)
 				.build();
 	}
+	
+	private Step Step_4_JPA_JPA_SQL_Server() {
+		log.info("*** JOB: "+jobName+" - step: "+"Step_4_JPA_JPA_SQL_Server");
+		
+		return stepBuilderFactory.get("Step_4_JPA_JPA_SQL_Server")
+				/* Here change chunk size for production */
+				.<Student, StudentJpa>chunk(3)
+				/* JPA input */
+				.reader(jpaCursorItemReader(null, null))
+				/* JPA/JPA process*/
+				.processor(firstItemProcessor)
+				/* JPA output */
+		.writer(jpaItemWriterSqlServer())
+				.faultTolerant()
+				.skip(Throwable.class)
+				//.skip(NullPointerException.class)
+				.skipLimit(100)
+				//.skipPolicy(new AlwaysSkipItemSkipPolicy())
+				.retryLimit(3)
+				.retry(Throwable.class)
+				//.listener(skipListener)
+				.listener(skipListenerImpl)
+				/* JPA/JPA */ 
+				.transactionManager(jpaTransactionManager)
+				.build();
+	}
+	
 	
 	@StepScope
 	@Bean
@@ -487,12 +522,35 @@ public class DefaultJobConfig {
 		return jpaCursorItemReader;
 	}
 	
+	@StepScope
+	@Bean
+	public JpaCursorItemReader<Student> jpaCursorItemReaderSqlServer(
+			@Value("#{jobParameters['currentItemCount']}") Integer currentItemCount,
+			@Value("#{jobParameters['maxItemCount']}") Integer maxItemCount) {
+		
+		JpaCursorItemReader<Student> jpaCursorItemReader = new JpaCursorItemReader<Student>();		
+		jpaCursorItemReader.setEntityManagerFactory(sqlserverEntityManagerFactory);		
+		jpaCursorItemReader.setQueryString("From Student");		
+		jpaCursorItemReader.setCurrentItemCount(currentItemCount);
+		jpaCursorItemReader.setMaxItemCount(maxItemCount);	
+		return jpaCursorItemReader;
+	}
+	
 	public JpaItemWriter<StudentJpa> jpaItemWriter() {
 		
 		JpaItemWriter<StudentJpa> jpaItemWriter = new JpaItemWriter<StudentJpa>();		
 		jpaItemWriter.setEntityManagerFactory(mysqlEntityManagerFactory);		
 		return jpaItemWriter;
 	}
+	
+	
+	public JpaItemWriter<StudentJpa> jpaItemWriterSqlServer() {
+
+		JpaItemWriter<StudentJpa> jpaItemWriter = new JpaItemWriter<StudentJpa>();
+		jpaItemWriter.setEntityManagerFactory(sqlserverEntityManagerFactory);
+		return jpaItemWriter;
+	}
+	 
 	
 	//TODO test Kafka https://www.youtube.com/watch?v=UJesCn731G4
 	/*
