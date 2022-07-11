@@ -5,20 +5,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-/*import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;*/
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.rbc.nexgen.batch.model.IIPMApplicationResponse;
+import com.rbc.nexgen.batch.model.IIPMApplicationResponseJson;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -32,12 +25,12 @@ public class IIPMService {
 	//@Autowired
 	//OAuth2AuthorizedClientService oauth2ClientService;
 	
-	List<IIPMApplicationResponse> list;
+	List<IIPMApplicationResponseJson> list;
 	
 	/**
 	 * @return the list
 	 */
-	public List<IIPMApplicationResponse> getList() {
+	public List<IIPMApplicationResponseJson> getList() {
 		return list;
 	}
 
@@ -46,11 +39,11 @@ public class IIPMService {
 	 * 
 	 * @param list the list to set
 	 */
-	public void setList(List<IIPMApplicationResponse> list) {
+	public void setList(List<IIPMApplicationResponseJson> list) {
 		this.list = list;
 	}
 
-	public List<IIPMApplicationResponse> restCallToGetApplications() {
+	public List<IIPMApplicationResponseJson> restCallToGetApplications() {
 		/* RestTemplate restTemplate = new RestTemplate(); */
 		//TODO externalize
 		String url = "https://apigw-int.devfg.rbc.com/PL00/Application/v1/App/0/100";
@@ -63,22 +56,22 @@ public class IIPMService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Service-Account", "Basic "+"TODO user:password Base64");
 		HttpEntity<Object> entity = new HttpEntity<>(headers);
-		ResponseEntity<List<IIPMApplicationResponse>> responseEntity =
-				restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<List<IIPMApplicationResponse>>() {});
-		//IIPMApplicationResponse[] IIPMApplicationResponseArray = restTemplate.getForObject(end_point,
-				//IIPMApplicationResponse[].class);
+		ResponseEntity<List<IIPMApplicationResponseJson>> responseEntity =
+				restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<List<IIPMApplicationResponseJson>>() {});
+		//IIPMApplicationResponseJson[] IIPMApplicationResponseJsonArray = restTemplate.getForObject(end_point,
+				//IIPMApplicationResponseJson[].class);
 		
 		list = new ArrayList<>();
-		List<IIPMApplicationResponse> responseList = responseEntity.getBody();
+		List<IIPMApplicationResponseJson> responseList = responseEntity.getBody();
 
-		for (IIPMApplicationResponse sr : responseList) {
+		for (IIPMApplicationResponseJson sr : responseList) {
 			list.add(sr);
 		}
 
 		return list;
 	}
 
-	public IIPMApplicationResponse getOneApplication(long id, String name) {
+	public IIPMApplicationResponseJson getOneApplication(long id, String name) {
 		log.info("We are reading 1 by 1 here - id = " + id + " and name = " + name);
 		if (list == null) {
 			restCallToGetApplications();
@@ -87,6 +80,7 @@ public class IIPMService {
 		if (list != null && !list.isEmpty()) {
 			return list.remove(0);
 		}
+		list = null;
 		return null;
 	}
 }

@@ -36,22 +36,25 @@ import org.springframework.batch.item.json.JacksonJsonObjectMarshaller;
 import org.springframework.batch.item.json.JacksonJsonObjectReader;
 import org.springframework.batch.item.json.JsonFileItemWriter;
 import org.springframework.batch.item.json.JsonItemReader;
+import org.springframework.batch.item.validator.ValidatingItemProcessor;
 import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.batch.item.xml.StaxEventItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.kafka.core.KafkaTemplate;
+//import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 //import com.rbc.nexgen.batch.listener.SkipListener;
 import com.rbc.nexgen.batch.listener.SkipListenerImpl;
+import com.rbc.nexgen.batch.listener.StepExecutionListenerImpl;
+import com.rbc.nexgen.batch.model.IIPMApplicationResponseJson;
+import com.rbc.nexgen.batch.model.IIPMApplication;
 import com.rbc.nexgen.batch.model.StudentCsv;
 import com.rbc.nexgen.batch.model.StudentJdbc;
 import com.rbc.nexgen.batch.model.StudentJson;
@@ -61,7 +64,11 @@ import com.rbc.nexgen.batch.mysql.entity.StudentJpa;
 import com.rbc.nexgen.batch.postgresql.entity.Student;
 import com.rbc.nexgen.batch.processor.FirstItemProcessor;
 import com.rbc.nexgen.batch.processor.StudentFromRestAPIProcessor;
+import com.rbc.nexgen.batch.processor.StudentItemValidator;
+import com.rbc.nexgen.batch.reader.GenericJsonObjectReader;
 import com.rbc.nexgen.batch.service.StudentService;
+import com.rbc.nexgen.batch.writer.ApplicationItemWriter;
+import com.rbc.nexgen.batch.writer.StudentItemWriter;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -75,8 +82,9 @@ public class DefaultJobConfig {
 	@Autowired
 	private StepBuilderFactory stepBuilderFactory;
 	
-	KafkaTemplate<Long, Student> template;
-	KafkaProperties properties;
+	/*
+	 * KafkaTemplate<Long, Student> template; KafkaProperties properties;
+	 */
 	/*
 	 * @Autowired private FirstItemReader firstItemReader;
 	 */
@@ -84,22 +92,34 @@ public class DefaultJobConfig {
 	@Autowired
 	private FirstItemProcessor firstItemProcessor;
 	
+	/*
+	 * @Autowired private StudentItemValidator studentItemValidator;
+	 */
+	
 	@Autowired
 	private StudentFromRestAPIProcessor studentFromRestAPIProcessor;
 	
-	/*
-	 * @Autowired private FirstItemWriter firstItemWriter;
-	 */	
+	@Autowired 
+	private ApplicationItemWriter applicationItemWriter;
+	
+	@Autowired 
+	private StudentItemWriter studentItemWriter;
+	 	
 	
 	@Autowired /* REST API */
 	private StudentService studentService;	 
 	
+	@Autowired /* TODO REST API */
+	private GenericJsonObjectReader<IIPMApplication> jsonService;
 	/*
 	 * @Autowired private SkipListener skipListener;
 	 */
 	
 	@Autowired
 	private SkipListenerImpl skipListenerImpl;
+	
+	@Autowired
+	private StepExecutionListenerImpl stepExecutionListenerImpl;
 	
 	@Autowired
 	@Qualifier("datasource")
@@ -134,16 +154,18 @@ public class DefaultJobConfig {
 	@Value("${jobName}")
 	private String jobName = "Default Job";
 	
-	@Bean
+	//@Bean
 	public Job defaultJob() {
 		log.info("*** JOB: "+jobName+" - starting.");
-		
+		//TODO check exit status for each steps
 		return jobBuilderFactory.get(jobName)
 				.incrementer(new RunIdIncrementer())
 				//.start(Step_1_JDBC_CSV())
 				//.start(Step_2_REST_CSV())
 				//.start(Step_3_JPA_JPA())
-				.start(Step_4_JPA_JPA_SQL_Server())
+				//.start(Step_4_JPA_JPA_SQL_Server())
+				.start(Step_5_JSON_SQL_Server())
+				//.start(Step_6_JSON())
 				.build();
 	}
 	/* *************************************************************** */
@@ -179,6 +201,8 @@ public class DefaultJobConfig {
 				.<StudentResponse, StudentJdbc>chunk(3)
 				/* REST API input */
 				.reader(itemReaderAdapter())
+				/* Validation processor */
+				//.processor(validatingItemProcessor())
 				/* REST API process */
 				.processor(studentFromRestAPIProcessor)
 				/* CSV output */
@@ -234,7 +258,7 @@ public class DefaultJobConfig {
 				/* JPA/JPA process*/
 				.processor(firstItemProcessor)
 				/* JPA output */
-		.writer(jpaItemWriterSqlServer())
+				.writer(jpaItemWriterSqlServer())
 				.faultTolerant()
 				.skip(Throwable.class)
 				//.skip(NullPointerException.class)
@@ -249,7 +273,44 @@ public class DefaultJobConfig {
 				.build();
 	}
 	
+	private Step Step_5_JSON_SQL_Server() {
+		log.info("*** JOB: "+jobName+" - step: "+"Step_5_JSON_SQL_Server");
+		//TODO test
+		try {
+		GenericJsonObjectReader<IIPMApplication> reader = 
+				new GenericJsonObjectReader<IIPMApplication>(IIPMApplication.class, "AppDocumentRest");
+		jsonService = reader;
+		reader.open(new FileSystemResource("C:\\Users\\zrosk\\git\\NexGenRepository\\NexGenBatchTemplate\\InputFiles\\applications.json"));
+		}catch(Exception e) {
+			System.out.println(e);
+		}
+		return stepBuilderFactory.get("Step_5_JSON_SQL_Server")
+				/* Here change chunk size for production */
+				.<IIPMApplication, IIPMApplication>chunk(3)
+				/* Json input */
+				.reader(itemReaderAdapterApplication())
+				/* Json process*/
+				//.processor(firstItemProcessor)
+				/* Json output */
+				.writer(applicationItemWriter)
+				.listener(stepExecutionListenerImpl)
+				.build();
+	}
 	
+	private Step Step_6_JSON() {
+		log.info("*** JOB: "+jobName+" - step: "+"Step_6_JSON");
+		
+		return stepBuilderFactory.get("Step_6_JSON")
+				/* Here change chunk size for production */
+				.<StudentJson, StudentJson>chunk(3)
+				/* Json input */
+				.reader(jsonItemReader(null))
+				/* Json process*/
+				//.processor(firstItemProcessor)
+				/* JPA output */
+				.writer(studentItemWriter)
+				.build();
+	}
 	@StepScope
 	@Bean
 	public FlatFileItemReader<StudentCsv> flatFileItemReader(
@@ -303,6 +364,8 @@ public class DefaultJobConfig {
 	@Bean
 	public JsonItemReader<StudentJson> jsonItemReader(
 			@Value("#{jobParameters['inputFile']}") FileSystemResource fileSystemResource) {
+		log.info("*** INSIDE JsonItemReader");
+		
 		JsonItemReader<StudentJson> jsonItemReader = 
 				new JsonItemReader<StudentJson>();
 		
@@ -314,6 +377,21 @@ public class DefaultJobConfig {
 		jsonItemReader.setCurrentItemCount(2);
 		
 		return jsonItemReader;
+	}
+	
+	/* REST API */
+	@StepScope
+	@Bean
+	public ItemReaderAdapter<IIPMApplication> itemReaderAdapterApplication() {
+		ItemReaderAdapter<IIPMApplication> itemReaderAdapter = 
+				new ItemReaderAdapter<IIPMApplication>();
+		/* Here name of the target service */
+		itemReaderAdapter.setTargetObject(jsonService);
+		/* Here we provide a way how to return item 1 by 1 */
+		itemReaderAdapter.setTargetMethod("getObjectFromTheList");
+		/* TODO */
+		//itemReaderAdapter.setArguments(new Object[] {1L, "Test"});
+		return itemReaderAdapter;
 	}
 	
 	@StepScope
@@ -550,8 +628,23 @@ public class DefaultJobConfig {
 		jpaItemWriter.setEntityManagerFactory(sqlserverEntityManagerFactory);
 		return jpaItemWriter;
 	}
-	 
 	
+	public JpaItemWriter<IIPMApplicationResponseJson> jpaApplicationItemWriterSqlServer() {
+
+		JpaItemWriter<IIPMApplicationResponseJson> jpaItemWriter = new JpaItemWriter<IIPMApplicationResponseJson>();
+		jpaItemWriter.setEntityManagerFactory(sqlserverEntityManagerFactory);
+		return jpaItemWriter;
+	}
+	 
+	//TODO test this
+	@Bean
+	public ValidatingItemProcessor<StudentResponse> validatingItemProcessor() {
+		ValidatingItemProcessor<StudentResponse> itemProcessor = new ValidatingItemProcessor<>();
+		itemProcessor.setValidator(new StudentItemValidator());
+		itemProcessor.setFilter(true);
+
+		return itemProcessor;
+	}
 	//TODO test Kafka https://www.youtube.com/watch?v=UJesCn731G4
 	/*
 	 * @Bean public KafkaItemWriter<Long, Student> kafkaItemWriter() { return new

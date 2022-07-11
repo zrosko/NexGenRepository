@@ -12,7 +12,7 @@ public class FirstItemWriter implements ItemWriter<StudentResponse> {
 
 	@Override
 	public void write(List<? extends StudentResponse> items) throws Exception {
-		System.out.println("Inside Item Writer");
+		System.out.println("Inside First Item Writer");
 		items.stream().forEach(System.out::println);
 	}
 

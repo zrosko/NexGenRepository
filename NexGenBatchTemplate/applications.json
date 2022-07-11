@@ -1,0 +1,337 @@
+{
+
+    "EosJSONEnvelope": {
+
+        "EosJSONHeader": {
+
+            "EosEvent": {
+
+                "_eventName": "restDocument",
+
+                "_totalPaginationRecords": 6561,
+
+                "_paginationLowerBoundary": 0,
+
+                "_paginationUpperBoundary": 10,
+
+                "_paginationRequiredFlag": true
+
+            }
+
+        },
+
+        "EosJSONBody": {
+
+            "DynamicViewSimpleAggregate": {
+
+                "AppDocumentRest": [
+
+                    {
+
+                        "_appCode": "1L00",
+
+                        "_l5": "ZZZ_Nelson, Sean",
+
+                        "_appCustodian": "Sypher, Cory",
+
+                        "_businessCriticality": "High",
+
+                        "_buExecSponsor": "ZZZ_Muroff, Rob",
+
+                        "_businessAppSponsor": "ZZZ_Muroff, Rob",
+
+                        "_appCoordinator": "He, Rick",
+
+                        "_recoveryPointObjective": "No Data Loss",
+
+                        "_recoveryTimeObjective": "1 Hour",
+
+                        "_recoveryTimeCapability": "",
+
+                        "_deploymentStyle": "RBC Data Center",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                    },
+
+                    {
+
+                        "_appCode": "21RT",
+
+                        "_l5": "Marchand, Rob (RBC IS)",
+
+                        "_appCustodian": "Abubaker, Mujahid",
+
+                        "_businessCriticality": "High",
+
+                        "_buExecSponsor": "Shah, Aneet (He/Him)",
+
+                        "_businessAppSponsor": "Stillabower, Paul (RBC I&TS)",
+
+                        "_appCoordinator": "Ghebremicael, Gabriel",
+
+                        "_recoveryPointObjective": "Minimal Data Loss",
+
+                        "_recoveryTimeObjective": "3 Hours",
+
+                        "_recoveryTimeCapability": "3 Hours",
+
+                        "_deploymentStyle": "RBC Data Center",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                    },
+
+                    {
+
+                        "_appCode": "2200",
+
+                        "_l5": "Williams, James (RBC Global Asset Management)",
+
+                        "_appCustodian": "Chavda, Chetna",
+
+                        "_businessCriticality": "Medium",
+
+                        "_buExecSponsor": "ZZZ_Davies, Brent (RBCCM)",
+
+                        "_businessAppSponsor": "ZZZ_Napthine, Jean",
+
+                        "_appCoordinator": "Not Provided",
+
+                        "_recoveryPointObjective": "No RPO Default RPC",
+
+                        "_recoveryTimeObjective": "24 Hours",
+
+                        "_recoveryTimeCapability": "",
+
+                        "_deploymentStyle": "RBC Data Center",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                    },
+
+                    {
+
+                        "_appCode": "22RT",
+
+                        "_l5": "Pandele, Daniel",
+
+                        "_appCustodian": "Goel, Kanika",
+
+                        "_businessCriticality": "High",
+
+                        "_buExecSponsor": "D'Eramo, Donato",
+
+                        "_businessAppSponsor": "D'Eramo, Donato",
+
+                        "_appCoordinator": "Ghebremicael, Gabriel",
+
+                        "_recoveryPointObjective": "Minimal Data Loss",
+
+                        "_recoveryTimeObjective": "1 Hour",
+
+                        "_recoveryTimeCapability": "3 Hours",
+
+                        "_deploymentStyle": "RBC Data Center",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                    },
+
+                    {
+
+                        "_appCode": "23RT",
+
+                        "_l5": "Marchand, Rob (RBC IS)",
+
+                        "_appCustodian": "Abubaker, Mujahid",
+
+                        "_businessCriticality": "High",
+
+                        "_buExecSponsor": "Shah, Aneet (He/Him)",
+
+                        "_businessAppSponsor": "Stillabower, Paul (RBC I&TS)",
+
+                        "_appCoordinator": "Ghebremicael, Gabriel",
+
+                        "_recoveryPointObjective": "Minimal Data Loss",
+
+                        "_recoveryTimeObjective": "3 Hours",
+
+                        "_recoveryTimeCapability": "3 Hours",
+
+                        "_deploymentStyle": "RBC Data Center",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                   },
+
+                    {
+
+                        "_appCode": "24RT",
+
+                        "_l5": "Marchand, Rob (RBC IS)",
+
+                        "_appCustodian": "Abubaker, Mujahid",
+
+                        "_businessCriticality": "High",
+
+                        "_buExecSponsor": "Shah, Aneet (He/Him)",
+
+                        "_businessAppSponsor": "Stillabower, Paul (RBC I&TS)",
+
+                        "_appCoordinator": "Ghebremicael, Gabriel",
+
+                        "_recoveryPointObjective": "Minimal Data Loss",
+
+                        "_recoveryTimeObjective": "1 Hour",
+
+                        "_recoveryTimeCapability": "3 Hours",
+
+                        "_deploymentStyle": "RBC Data Center",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                    },
+
+                    {
+
+                        "_appCode": "25RT",
+
+                        "_l5": "Marchand, Rob (RBC IS)",
+
+                        "_appCustodian": "Abubaker, Mujahid",
+
+                        "_businessCriticality": "High",
+
+                        "_buExecSponsor": "McCormack, Breiffni",
+
+                        "_businessAppSponsor": "Rajaratnam, Ravi (RBC IS)",
+
+                        "_appCoordinator": "Ghebremicael, Gabriel",
+
+                        "_recoveryPointObjective": "Minimal Data Loss",
+
+                        "_recoveryTimeObjective": "4 Hours",
+
+                        "_recoveryTimeCapability": "3 Hours",
+
+                        "_deploymentStyle": "RBC Data Center",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                    },
+
+                    {
+
+                        "_appCode": "28RT",
+
+                        "_l5": "Chapman, Ben",
+
+                        "_appCustodian": "Nensi, Azim (RBC IS)",
+
+                        "_businessCriticality": "High",
+
+                        "_buExecSponsor": "Kah, Thong Yee (RBC IS)",
+
+                        "_businessAppSponsor": "Sabapathi, Nezeer (RBC IS)",
+
+                        "_appCoordinator": "Ross, Jennifer (RBC IT)",
+
+                        "_recoveryPointObjective": "Minimal Data Loss",
+
+                        "_recoveryTimeObjective": "4 Hours",
+
+                        "_recoveryTimeCapability": "3 Hours",
+
+                        "_deploymentStyle": "RBC Data Center",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                    },
+
+                    {
+
+                        "_appCode": "2900",
+
+                        "_l5": "Marchand, Rob (RBC IS)",
+
+                        "_appCustodian": "Abubaker, Mujahid",
+
+                        "_businessCriticality": "Medium",
+
+                        "_buExecSponsor": "Shah, Aneet (He/Him)",
+
+                        "_businessAppSponsor": "Stillabower, Paul (RBC I&TS)",
+
+                        "_appCoordinator": "Ross, Jennifer (RBC IT)",
+
+                        "_recoveryPointObjective": "Minimal Data Loss",
+
+                        "_recoveryTimeObjective": "24 Hours",
+
+                        "_recoveryTimeCapability": "5 Hours",
+
+                        "_deploymentStyle": "RBC Data Center",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                    },
+
+                    {
+
+                        "_appCode": "2B00",
+
+                        "_l5": "Komor, Marek",
+
+                        "_appCustodian": "Samji, Shahina",
+
+                        "_businessCriticality": "High",
+
+                        "_buExecSponsor": "Lansdowne-Higgins, Lisa",
+
+                        "_businessAppSponsor": "Marinkovic, Lana",
+
+                        "_appCoordinator": "Watt, Steve",
+
+                        "_recoveryPointObjective": "Minimal Data Loss",
+
+                        "_recoveryTimeObjective": "3 Hours",
+
+                        "_recoveryTimeCapability": "3 Hours",
+
+                        "_deploymentStyle": "RBC Data Center,RBC Data Center - Pivotal Cloud Foundry (PCF)",
+
+                        "_secondaryDataCenters": "Canada - Guelph - Guelph Computer Centre (GCC)",
+
+                        "_vendorManaged": "No"
+
+                    }
+
+                ]
+
+            }
+
+        }
+
+    }
+
+}

@@ -55,6 +55,7 @@ public class StudentService {
 		if (list != null && !list.isEmpty()) {
 			return list.remove(0);
 		}
+		list = null;
 		return null;
 	}
 

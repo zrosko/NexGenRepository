@@ -23,15 +23,13 @@ inputFile=C:\Programs\Spring\Workspaces\NexGenBatchTemplate\InputFiles\students.
 	"com.rbc.nexgen.batch.processor", 
 	"com.rbc.nexgen.batch.writer",
 	"com.rbc.nexgen.batch.service", 
-	"com.rbc.nexgen.batch.mysql.entity",
-	"com.rbc.nexgen.batch.postgresql.entity",
 	"com.rbc.nexgen.batch.sqlserver.entity",
 	"com.rbc.nexgen.batch.listener"
 })
-public class BatchTemplateApplication {
+public class IIPMBatchApplication {
 
 	public static void main(String[] args) {
-		SpringApplication application = new SpringApplication(BatchTemplateApplication.class);
+		SpringApplication application = new SpringApplication(IIPMBatchApplication.class);
 		//application.setBannerMode(Banner.Mode.OFF);
 		application.setBanner(new NexGenBanner());
 		application.run(args);
