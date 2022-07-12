@@ -38,26 +38,6 @@ public class IIPMService {
 		this.list = list;
 	}
 
-	public List<IIPMApplicationResponseJson> restCallToGetApplicationsFromFile() {
-		try {
-			GenericJsonObjectReader<IIPMApplicationResponseJson> reader = 
-					new GenericJsonObjectReader<IIPMApplicationResponseJson>(IIPMApplicationResponseJson.class, "AppDocumentRest");
-			reader.open(new FileSystemResource("C:\\Users\\zrosk\\git\\NexGenRepository\\NexGenBatchIIPM\\InputFiles\\applications.json"));
-			
-			List<Object> ret_list = reader.getObjectsList(); 			
-			list = new ArrayList<>();
-			
-			while (ret_list != null && !ret_list.isEmpty()) {
-				list.add((IIPMApplicationResponseJson) ret_list.remove(0));
-			}
-		}catch(Exception e) {
-			log.error("**** IIPM - failed calling REST: "+e);
-		}finally {
-			log.info("**** IIPM - finished call to REST API");
-		}
-		return list;
-	}
-	
 	public List<IIPMApplicationResponseJson> restCallToGetApplications() {
 		try {
 			GenericJsonObjectReader<IIPMApplicationResponseJson> reader = 

@@ -172,7 +172,7 @@ public class IIPMJobConfig {
 	}
 	
 	public JpaItemWriter<IIPMApplication> jpaItemWriter() {
-		
+		log.info("**** IIPM - writing initialization ");
 		JpaItemWriter<IIPMApplication> jpaItemWriter = new JpaItemWriter<IIPMApplication>();		
 		jpaItemWriter.setEntityManagerFactory(sqlserverEntityManagerFactory);		
 		return jpaItemWriter;

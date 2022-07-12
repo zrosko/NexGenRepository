@@ -29,10 +29,10 @@ inputFile=C:\Programs\Spring\Workspaces\NexGenBatchTemplate\InputFiles\students.
 	"com.rbc.nexgen.batch.model"
 })
 @EntityScan({"com.rbc.nexgen.batch.model=IIPMApplication.class"})
-public class IIPMBatchApplication {
+public class WorkdayBatchApplication {
 
 	public static void main(String[] args) {
-		SpringApplication application = new SpringApplication(IIPMBatchApplication.class);
+		SpringApplication application = new SpringApplication(WorkdayBatchApplication.class);
 		//application.setBannerMode(Banner.Mode.OFF);
 		application.setBanner(new NexGenBanner());
 		application.run(args);

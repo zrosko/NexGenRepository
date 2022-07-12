@@ -134,7 +134,8 @@ public class DefaultJobConfig {
 	private DataSource postgresdatasource;
 	
 	@Autowired
-	@Qualifier("sqlserverdatasource") private DataSource sqlserverdatasource;
+	@Qualifier("sqlserverdatasource") 
+	private DataSource sqlserverdatasource;
 	
 	@Autowired
 	@Qualifier("postgresqlEntityManagerFactory")
